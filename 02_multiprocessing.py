@@ -43,7 +43,7 @@ def multiprocessing_search(files, keywords):
 
     # Розділяємо файли на частини для процесів
     num_processes = min(4, len(files))  # Максимум 4 процеси
-    chunk_size = len(files) // num_processes
+    chunk_size = len(files) // num_processes if num_processes > 0 else 1
     for i in range(num_processes):
         start = i * chunk_size
         end = len(files) if i == num_processes - 1 else (i + 1) * chunk_size
@@ -71,6 +71,9 @@ if __name__ == "__main__":
 
     # Отримуємо список файлів та сортуємо їх за номерами
     files = [f for f in os.listdir(".") if f.endswith(".txt")]
+    files.sort(
+        key=lambda x: int(x.split("_")[1].split(".")[0])
+    )  # Сортуємо файли за числовим значенням в їх назвах
 
     print(
         f"{Fore.GREEN}Знайдені файли: {files}"
@@ -89,8 +92,21 @@ if __name__ == "__main__":
         )
 
         print(f"{Style.BRIGHT}Результати пошуку:")
-        if results_multiprocessing:
-            for keyword, found_files in results_multiprocessing.items():
+
+        # Сортуємо файли в результатах перед виведенням
+        sorted_results = defaultdict(list)
+        for keyword in keywords:
+            found_files = sorted(
+                results_multiprocessing.get(keyword, []),
+                key=lambda x: int(x.split("_")[1].split(".")[0]),
+            )
+            sorted_results[keyword] = found_files
+
+        if sorted_results:
+            for (
+                keyword
+            ) in keywords:  # Виводимо результати в правильному порядку ключових слів
+                found_files = sorted_results[keyword]
                 print(
                     f"{Fore.BLUE}Ключове слово '{keyword}' знайдено у файлах: {Fore.YELLOW}{found_files}"
                 )

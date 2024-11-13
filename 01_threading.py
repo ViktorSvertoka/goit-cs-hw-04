@@ -62,6 +62,9 @@ if __name__ == "__main__":
 
     # Отримуємо список файлів та сортуємо їх за номерами
     files = [f for f in os.listdir(".") if f.endswith(".txt")]
+    files.sort(
+        key=lambda x: int(x.split("_")[1].split(".")[0])
+    )  # Сортуємо файли за номерами у назвах
 
     print(
         f"{Fore.GREEN}Знайдені файли: {files}"
@@ -80,8 +83,21 @@ if __name__ == "__main__":
         )
 
         print(f"{Style.BRIGHT}Результати пошуку:")
-        if results_threading:
-            for keyword, found_files in results_threading.items():
+
+        # Сортуємо файли перед виведенням
+        sorted_results = defaultdict(list)
+        for keyword in keywords:
+            found_files = sorted(
+                results_threading.get(keyword, []),
+                key=lambda x: int(x.split("_")[1].split(".")[0]),
+            )
+            sorted_results[keyword] = found_files
+
+        if sorted_results:
+            for (
+                keyword
+            ) in keywords:  # Виводимо результати в правильному порядку ключових слів
+                found_files = sorted_results[keyword]
                 print(
                     f"{Fore.BLUE}Ключове слово '{keyword}' знайдено у файлах: {Fore.YELLOW}{found_files}"
                 )
